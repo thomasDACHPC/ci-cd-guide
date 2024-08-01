@@ -1,4 +1,4 @@
-HELP.md
+development/HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -33,6 +33,6 @@ build/
 .vscode/
 
 ### Configuration files ###
-deployment.yaml
-service.yaml
-Dockerfile
+development/deployment.yaml
+development/service.yaml
+development/Dockerfile
