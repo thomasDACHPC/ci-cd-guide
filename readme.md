@@ -36,14 +36,11 @@ public class SpringBootDockerApplication {
 		SpringApplication.run(SpringBootDockerApplication.class, args);
 	}
 }
+```
 When started, accessing [`http://localhost:8080/`]() will display the message *Hello from the Kubernetes Cluster!*.\
 At the moment this statement is incorrect, but this will change when following this guide. Stop the application again before continuing.
 
-### Create a Java Spring Boot Application
-Download a a pre configured Java Spring Boot Application from the [Spring Initializr](https://start.spring.io/). Use Java version 17 and Maven and add the *Spring Web* dependency.
 
-Create an application. You can use the following code as a guideline. Some naming depends on your configuration of the Spring Initializr project.
-```
 
 ### Package the Java Application
 Use `./mvnw package` withing the project to package the application as .jar file.
@@ -93,7 +90,7 @@ Now we are accessing the the universe of Kubernetes. Kubernetes, often abbreviat
 
 
 ### Create a Kubernetes Deployment File (deployment.yaml)
-To tell Kubernetes which application and how many pods should be deployed a deployment configuration is necesseray. A simple `deployment.yaml` file can be found in the project folder `gitDeployment`.
+To tell Kubernetes which application and how many pods should be deployed a deployment configuration is necesseray. A simple `deployment.yaml` file can be found in the project folder `deployment`.
 ```
 apiVersion: apps/v1
 kind: Deployment
