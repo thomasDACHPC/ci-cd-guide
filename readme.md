@@ -98,8 +98,12 @@ brew install socket_vmnet
 brew tap homebrew/services
 HOMEBREW=$(which brew) && sudo ${HOMEBREW} services start socket_vmnet
 ```
-The minikube cluster ist started with
+The minikube cluster ist started with\
 `minikube start --driver qemu --network socket_vmnet`.
+
+### Prepare Minikube for Kubernetes Ingress
+Later in this guide we will establish a Kubernetes Ingress. A corresponding addon has to be enabled in Minikube\
+`minikube addons enable ingress`
 
 ### Create a Kubernetes Deployment File (deployment.yaml)
 To tell Kubernetes which application and how many pods should be deployed a deployment configuration is necesseray. A simple `deployment.yaml` file can be found in the project folder `deployment`.
@@ -229,12 +233,21 @@ Accessing `<IP>:81` with your browser should display the known message from the 
 At this point, you have deployed an application in Kubernetes and can access it from outside the cluster!
 
 
-## 
+## Creating an Ingress
+[Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. 
+Traffic routing is controlled by rules defined on the Ingress resource.
+An Ingress may be configured to give Services externally-reachable URLs, load balance traffic, terminate SSL / TLS, 
+and offer name-based virtual hosting. 
+An Ingress controller is responsible for fulfilling the Ingress, usually with a load balancer, 
+though it may also configure your edge router or additional frontends to help handle the traffic.
+
+An example ingress configuration file as well as an ingress-service can be found in the deployment folder.
+
+The service defined in the ingress-service file is similar to the previous LoadBalancber
 ## FluxCD
+
 ## Jenkins
 Jenkins is an open-source automation server that is widely used for continuous integration (CI) and continuous delivery (CD) in software development. 
 It helps automate parts of the software development process related to building, testing, and deploying applications, which leads to more efficient and reliable workflows.
 To install Jenkins in your Kubernetes cluster follow sections [Kubernetes Jenkins Deployment](https://www.jenkins.io/doc/book/installing/kubernetes/#kubernetes-jenkins-deployment) 
 and [Post-installation setup wizard](https://www.jenkins.io/doc/book/installing/kubernetes/#kubernetes-jenkins-deployment) of the official Jenkins handbook.
-
-test für jenkins neu

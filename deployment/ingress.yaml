@@ -18,4 +18,3 @@ spec:
                 name: my-spring-boot-app-cluster-service
                 port:
                   number: 81
-# https://medium.com/@sushantkumarsinha22/kubernetes-setting-up-ingress-on-apple-silicon-mac-m1-5fb6bddcb838
