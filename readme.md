@@ -37,10 +37,8 @@ public class SpringBootDockerApplication {
 	}
 }
 ```
-When started, accessing [`http://localhost:8080/`]() will display the message *Hello from the Kubernetes Cluster!*.\
-At the moment this statement is incorrect, but this will change when following this guide. Stop the application again before continuing.
-
-
+When started, accessing [`http://localhost:8080/`]() will display the message returned by the *RequestMapping("/")-Method*. 
+Stop the application before continuing.
 
 ### Package the Java Application
 Use `./mvnw package` withing the project to package the application as .jar file.
@@ -61,13 +59,13 @@ This Dockerfile is used to set up a Java environment and copy our application in
 
 ### Build the Docker Image
 `docker build . -t spring-boot-app`\
-The `-t` option tags the image as ***spring-boot-app***
+The `-t` option tags the image as ***spring-boot-app***.
 Note that the docker deamon has to run to execute the command (i.e. start Docker Desktop for example)
 
 ### Run a Docker Container (Optional)
 You can test if the imaging process was successfull by running the command\
 `docker run -p 8080:8080 <image-id>`\
-Again, accessing [`http://localhost:8080/`]() should display the message *Hello from the Kubernetes Cluster!*. But the message is still not true. Currently the application runs in a container.
+Again, accessing [`http://localhost:8080/`]() will display the message returned by the *RequestMapping("/")-Method*.
 Please shut down the container before continuing.
 
 ### Push the Image to the Docker Container Registry (DockerID required)
@@ -88,6 +86,19 @@ Now we are accessing the the universe of Kubernetes. Kubernetes, often abbreviat
 - **Service**: An abstraction that defines a logical set of pods and a policy by which to access them, usually via an IP address or DNS name.
 - **Namespace**: A way to divide cluster resources between multiple users. Namespaces are a way to organize objects in the cluster and are often used for multi-tenant environments.
 
+### Setup Minikube on MacOs
+Minikube is an open-source tool that allows you to run a single-node Kubernetes cluster on your local machine.
+Minikube uses a hypervisor to create a virtual machine or a container runtime to simulate a Kubernetes environment.
+Due to the limitations of the Docker driver on Apple Silicon Chips we will use a QEMU driver for virtualization.
+The following commands will install QEMU and *socket_vmnet* which will allow Minikube to run `minikube tunnel` command if needed.
+```
+brew install qemu
+brew install socket_vmnet
+brew tap homebrew/services
+HOMEBREW=$(which brew) && sudo ${HOMEBREW} services start socket_vmnet
+```
+The minikube cluster ist started with
+`minikube start --driver qemu --network socket_vmnet`.
 
 ### Create a Kubernetes Deployment File (deployment.yaml)
 To tell Kubernetes which application and how many pods should be deployed a deployment configuration is necesseray. A simple `deployment.yaml` file can be found in the project folder `deployment`.
@@ -139,15 +150,17 @@ containers:
         	- containerPort: 8080
 ```
 These lines of code set the application image which should be deployed by Kubernetes. The *image* is equivalent to `<docker-repository-name>:<tag>` in this case. 
-The *containerPort* defines the port on which the application is accessible.
+The *containerPort* defines the port on which the application is accessible within the Kubernetes cluster.
 
 ---
 
-For more information about deployments refer to the Kubernetes documentation! 
+For more information about deployments refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)! 
 
 
 ### Create a Kubernetes Service File (service.yaml)
 The next part is about the configuration of a service. Again, a simple `service.yaml` file can be found in the project folder `deployment`.
+In Kubernetes, a Service is a method for exposing a network application that is running as one or more Pods in your cluster.
+The first type of service we will use is the _load balancer_. It allows to access an application from the outside of the cluster.
 ```
 apiVersion: v1
 kind: Service
@@ -163,20 +176,61 @@ spec:
       port: 81
       targetPort: 8080
 ```
+A few comments on this file:
 
-Metadata contains the unique name of the service as well as its namesace. Again, the namespace should not be changed. 
+---
+```
+kind: Service
+metadata:
+	name: spring-boot-app-deployment
+	namespace: default
+```
+Sets a unique name and the namespace for the service. For this guide, do not change the namespace.
 
+---
+```
+spec:
+  type: LoadBalancer
+  selector:
+    app: spring-boot-app
+  ports:
+  - protocol: TCP
+    port: 81
+    targetPort: 8080
+```
+In these lines of code the type of the service is specified as well as the application.
+All traffic arriving at port 81 of the service is forwarded to port 8080 of the application _spring-boot-app_.
+The name has to match the corresponding naming in the deployment file.
 
 ### Apply the configuration files
+Both files can be applied to the Kubernetes cluster by executing the following commands:
 ```
-kubectl apply -f gitDeployment/deployment.yaml
-kubectl apply -f gitDeployment/service.yaml
+kubectl apply -f deployment/deployment.yaml
+kubectl apply -f deployment/service.yaml
 ```
 ### Check status
+After applying the configuration files check the cluster status with the following command:
 ```
 kubectl get all
 ```
+You should see two pods as well as a service of type LoadBalancer.
+Looking at the LoadBalancer service the External-IP is _\<none\>_.
+To access the service and the corresponding application from outside the cluster we have to create a routable IP.
 ### Create a Routable IP
+In another terminal window issue the following command:
 ``` 
 minikube tunnel
 ```
+The terminal has to stay open.\
+Check the status of the cluster again.
+The LoadBalancer service should now have an External-IP.
+Accessing `<IP>:81` with your browser should display the known message from the RequestMapping-Method.
+At this point, you have deployed an application in Kubernetes and can access it from outside the cluster!
+
+
+## 
+## FluxCD
+## Jenkins
+To install Jenkins in your Kubernetes cluster follow sections [Kubernetes Jenkins Deployment](https://www.jenkins.io/doc/book/installing/kubernetes/#kubernetes-jenkins-deployment) 
+and [Post-installation setup wizard](https://www.jenkins.io/doc/book/installing/kubernetes/#kubernetes-jenkins-deployment) of the official jenkins handbook.
+

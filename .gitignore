@@ -35,4 +35,4 @@ build/
 ### Configuration files ###
 development/deployment.yaml
 development/service.yaml
-development/Dockerfile
+Dockerfile

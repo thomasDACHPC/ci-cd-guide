@@ -11,7 +11,7 @@ public class SpringBootDockerApplication {
 
 	@RequestMapping("/")
 	public String home() {
-		return "Hello from the Kubernetes Cluster!";
+		return "Hello from the Kubernetes Cluster v.2.0.0!";
 	}
 
 	public static void main(String[] args) {
