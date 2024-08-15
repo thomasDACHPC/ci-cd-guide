@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: spring-boot-app
-          image: thomasdachpc/cicdpipelineproject:v1.0.0
+          image: thomasdachpc/cicdguideproject:v1.0.0
           ports:
             - containerPort: 8080

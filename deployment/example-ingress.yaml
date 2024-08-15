@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: my-spring-boot-app.com
+      http:
+        paths:
+          - path: /example
+            pathType: Prefix
+            backend:
+              service:
+                name: my-spring-boot-app-cluster-service
+                port:
+                  number: 81
+# https://medium.com/@sushantkumarsinha22/kubernetes-setting-up-ingress-on-apple-silicon-mac-m1-5fb6bddcb838

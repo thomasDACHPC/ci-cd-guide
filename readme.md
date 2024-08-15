@@ -69,7 +69,8 @@ Again, accessing [`http://localhost:8080/`]() will display the message returned 
 Please shut down the container before continuing.
 
 ### Push the Image to the Docker Container Registry (DockerID required)
-Use the following command to push the image to the Docker Container Registry (Docker Hub). To be compliant with this gude use `cicdguideproject:v1.0.0` as `<docker-repository-name>:<tag>`
+Use the following command to push the image to the Docker Container Registry (Docker Hub). To be compliant with this gude use `cicdguideproject:v1.0.0` as `<docker-repository-name>:<tag>`.
+`<docker-id>` is your docker username.
 ```
 docker tag <current-image-name> <docker-id>/<docker-repository-name>:<tag>
 docker push <docker-id>/<docker-repository-name>:<tag>
@@ -231,6 +232,8 @@ At this point, you have deployed an application in Kubernetes and can access it 
 ## 
 ## FluxCD
 ## Jenkins
+Jenkins is an open-source automation server that is widely used for continuous integration (CI) and continuous delivery (CD) in software development. 
+It helps automate parts of the software development process related to building, testing, and deploying applications, which leads to more efficient and reliable workflows.
 To install Jenkins in your Kubernetes cluster follow sections [Kubernetes Jenkins Deployment](https://www.jenkins.io/doc/book/installing/kubernetes/#kubernetes-jenkins-deployment) 
-and [Post-installation setup wizard](https://www.jenkins.io/doc/book/installing/kubernetes/#kubernetes-jenkins-deployment) of the official jenkins handbook.
+and [Post-installation setup wizard](https://www.jenkins.io/doc/book/installing/kubernetes/#kubernetes-jenkins-deployment) of the official Jenkins handbook.
 
