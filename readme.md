@@ -63,14 +63,14 @@ The `-t` option tags the image as ***spring-boot-app***.
 Note that the docker deamon has to run to execute the command (i.e. start Docker Desktop for example)
 
 ### Run a Docker Container (Optional)
-You can test if the imaging process was successfull by running the command\
+You can test if the imaging process was successful by running the command\
 `docker run -p 8080:8080 <image-id>`\
 Again, accessing [`http://localhost:8080/`]() will display the message returned by the *RequestMapping("/")-Method*.
 Please shut down the container before continuing.
 
 ### Push the Image to the Docker Container Registry (DockerID required)
-Use the following command to push the image to the Docker Container Registry (Docker Hub). To be compliant with this gude use `cicdguideproject:v1.0.0` as `<docker-repository-name>:<tag>`.
-`<docker-id>` is your docker username.
+Use the following command to push the image to the Docker Container Registry (Docker Hub). To be compliant with this guide use `cicdguideproject:v1.0.0` as `<docker-repository-name>:<tag>`.
+`<docker-id>` is your docker username in lowercase.
 ```
 docker tag <current-image-name> <docker-id>/<docker-repository-name>:<tag>
 docker push <docker-id>/<docker-repository-name>:<tag>
@@ -106,7 +106,7 @@ Later in this guide we will establish a Kubernetes Ingress. A corresponding addo
 `minikube addons enable ingress`
 
 ### Create a Kubernetes Deployment File (deployment.yaml)
-To tell Kubernetes which application and how many pods should be deployed a deployment configuration is necesseray. A simple `deployment.yaml` file can be found in the project folder `deployment`.
+To tell Kubernetes which application and how many pods should be deployed a deployment configuration is necessary. A simple `deployment.yaml` file can be found in the project folder `deployment`.
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -131,22 +131,20 @@ spec:
 ```
 A few comments on this file:
 
----
+
 ```
+kind: Deployment
 metadata:
 	name: spring-boot-app-deployment
 	namespace: default
 ```
 
-Sets a unique name for the deployment and its namespace. For this guide, do not change the namespace.
-
----
+Metadata sets a unique name for the deployment and its namespace. For this guide, do not change the namespace.
 ```
 replicas: 2
 ```
-Defines how many pods of the application should be created by Kubernetes.
+_Replicas_ defines how many pods of the application should be created by Kubernetes.
 
----
 ```
 containers:
 	- name: spring-boot-app
@@ -157,10 +155,7 @@ containers:
 These lines of code set the application image which should be deployed by Kubernetes. The *image* is equivalent to `<docker-repository-name>:<tag>` in this case. 
 The *containerPort* defines the port on which the application is accessible within the Kubernetes cluster.
 
----
-
-For more information about deployments refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)! 
-
+For more information about deployments refer to the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)!
 
 ### Create a Kubernetes Service File (service.yaml)
 The next part is about the configuration of a service. Again, a simple `service.yaml` file can be found in the project folder `deployment`.
@@ -183,16 +178,14 @@ spec:
 ```
 A few comments on this file:
 
----
 ```
 kind: Service
 metadata:
 	name: spring-boot-app-deployment
 	namespace: default
 ```
-Sets a unique name and the namespace for the service. For this guide, do not change the namespace.
+Metadata sets a unique name and the namespace for the service. For this guide, do not change the namespace.
 
----
 ```
 spec:
   type: LoadBalancer
@@ -213,6 +206,7 @@ Both files can be applied to the Kubernetes cluster by executing the following c
 kubectl apply -f deployment/deployment.yaml
 kubectl apply -f deployment/service.yaml
 ```
+
 ### Check status
 After applying the configuration files check the cluster status with the following command:
 ```
@@ -233,8 +227,8 @@ Accessing `<IP>:81` with your browser should display the known message from the 
 At this point, you have deployed an application in Kubernetes and can access it from outside the cluster!
 
 
-## Creating an Ingress
-[Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. 
+## Creating an Ingress (ingress.yaml, ingress-service.yaml)
+An [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) exposes HTTP and HTTPS routes from outside the cluster to services within the cluster. 
 Traffic routing is controlled by rules defined on the Ingress resource.
 An Ingress may be configured to give Services externally-reachable URLs, load balance traffic, terminate SSL / TLS, 
 and offer name-based virtual hosting. 
@@ -242,8 +236,83 @@ An Ingress controller is responsible for fulfilling the Ingress, usually with a 
 though it may also configure your edge router or additional frontends to help handle the traffic.
 
 An example ingress configuration file as well as an ingress-service can be found in the deployment folder.
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: my-spring-boot-app.com
+      http:
+        paths:
+          - path: /example
+            pathType: Prefix
+            backend:
+              service:
+                name: my-spring-boot-app-cluster-service
+                port:
+                  number: 81
+```
+Let us break down the Ingress configuration starting with the _spec_ section.
+```
+    - host: my-spring-boot-app.com
+      http:
+        paths:
+          - path: /example
+            pathType: Prefix
+```
+This part defines a base URL _my-spring-boot-app.com_  where the Ingress is accessible and an additional subpath _/example_.
+The _pathType: Prefix_ indicates that every URL starting with _my-spring-boot-app.com/example_ is allowed to use to reach the Ingress (e.g. _my-spring-boot-app.com/example/anotherpath_).
 
-The service defined in the ingress-service file is similar to the previous LoadBalancber
+
+
+```
+              service:
+                name: my-spring-boot-app-cluster-service
+                port:
+                  number: 81
+```
+The service-part defines the service and its port the Ingress is forwarding traffic to. In this case it is a ClusterIP service configured in the ingress-service file.
+The configuration is similar to the previous LoadBalancer. A ClusterIP service enables the communication with an application only within the cluster.
+Let us get to the _metadata_ section.
+```
+metadata:
+  name: example-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+```
+Metadata contains the name and the namespace of the Ingress. 
+Remember that base URL _my-spring-boot-app.com_ is defined a base URL for the Ingress. The annotation _nginx.ingress.kubernetes.io/rewrite-target: /_ ensures that every
+URL will be rewritten as simple base URL before forwarding it to the application. This is important if the application does not support a subpath.
+An example:
+Our Spring applications method is annotated with _@RequestMapping("/")_ so it just listens to the base URL.
+Our Ingress defines _my-spring-boot-app.com_ as base URL and _/example_ as a subpath.
+Without rewriting to the base URL, accessing the Ingress via _my-spring-boot-app.com/example_ would lead to forwarding of _my-spring-boot-app.com/example_
+to the application. Because the application just listens to _my-spring-boot-app.com_ we would get a _404 Not found_ error. With the rewrite annotation
+_my-spring-boot-app.com/example_ will be rewritten and forwarded as _my-spring-boot-app.com/_ to the application.
+---
+Overall, our current cluster architecture looks like this:
+\
+\
+\
+\
+![cluster-structure.png](images/cluster-structure.png)
+
+In addition to accessing the application via the External-IP of the LoadBalancer service you can now use the URL _my-spring-boot-app.com/example_.
+As _my-spring-boot-app.com_ is just a self defined URL your computer does not know how to resolve it to an IP address.
+To solve this problem we need the Minkube IP address. We can get the address with `minikube IP`.
+Note, that the Ingress is not accessible via the IP address only.
+There are two options to use the URL to access the application:
+1. Use a curl command and add the _--resolve_ option\
+curl http://my-spring-boot-app.com/v2 --resolve "my-spring-boot-app.com:81:\<minikube IP\>"
+2. Access your hosts file with `sudo nano /etc/hosts ` and add the following line of code. Saving the file enables to reach the domain URL my-spring-boot-app.com using your browser.\
+`<minikube IP>   my-spring-boot-app.com`
 ## FluxCD
 
 ## Jenkins
