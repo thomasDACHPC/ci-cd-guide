@@ -287,6 +287,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 ```
+
 Metadata contains the name and the namespace of the Ingress. 
 Remember that base URL _my-spring-boot-app.com_ is defined a base URL for the Ingress. The annotation _nginx.ingress.kubernetes.io/rewrite-target: /_ ensures that every
 URL will be rewritten as simple base URL before forwarding it to the application. This is important if the application does not support a subpath.
@@ -296,10 +297,9 @@ Our Ingress defines _my-spring-boot-app.com_ as base URL and _/example_ as a sub
 Without rewriting to the base URL, accessing the Ingress via _my-spring-boot-app.com/example_ would lead to forwarding of _my-spring-boot-app.com/example_
 to the application. Because the application just listens to _my-spring-boot-app.com_ we would get a _404 Not found_ error. With the rewrite annotation
 _my-spring-boot-app.com/example_ will be rewritten and forwarded as _my-spring-boot-app.com/_ to the application.
+
 ---
 Overall, our current cluster architecture looks like this:
-\
-\
 \
 \
 ![cluster-structure.png](images/cluster-structure.png)
